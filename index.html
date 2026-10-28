@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Live GPS Tracker & Telemetry</title>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Map Container -->
+    <div id="map"></div>
+
+    <!-- Top Overlay: App Header & Quick Status -->
+    <header class="top-nav">
+      <div class="brand">
+        <div class="brand-icon">
+          <i data-lucide="navigation"></i>
+        </div>
+        <div>
+          <h1 class="brand-title">GeoTrack Live</h1>
+          <p class="brand-subtitle">Real-time Location & Telemetry</p>
+        </div>
+      </div>
+
+      <div class="status-container">
+        <div id="connection-pill" class="status-pill idle">
+          <span class="status-dot"></span>
+          <span id="status-text">Standby</span>
+        </div>
+        <div class="unit-toggle" id="unit-toggle" title="Toggle Units (Metric / Imperial)">
+          <span class="active-unit" id="unit-label">KM / KMH</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Floating Map Quick Controls (Right side) -->
+    <div class="map-controls">
+      <button id="btn-recenter" class="map-btn active" title="Follow My Location">
+        <i data-lucide="crosshair"></i>
+      </button>
+      <button id="btn-layers" class="map-btn" title="Change Base Map">
+        <i data-lucide="layers"></i>
+      </button>
+      <div id="layer-dropdown" class="layer-dropdown hidden">
+        <button class="layer-opt active" data-layer="streets">Street (Carto)</button>
+        <button class="layer-opt" data-layer="dark">Dark Matter</button>
+        <button class="layer-opt" data-layer="osm">OpenStreetMap</button>
+        <button class="layer-opt" data-layer="satellite">Satellite</button>
+      </div>
+    </div>
+
+    <!-- Bottom Dashboard Drawer / Telemetry HUD -->
+    <section class="dashboard">
+      <!-- Main Metric Cards -->
+      <div class="telemetry-grid">
+        <div class="metric-card highlight">
+          <div class="metric-header">
+            <span class="metric-title">Speed</span>
+            <i data-lucide="gauge"></i>
+          </div>
+          <div class="metric-value-row">
+            <span class="metric-val" id="val-speed">0.0</span>
+            <span class="metric-unit" id="unit-speed">km/h</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">Distance</span>
+            <i data-lucide="milestone"></i>
+          </div>
+          <div class="metric-value-row">
+            <span class="metric-val" id="val-distance">0.00</span>
+            <span class="metric-unit" id="unit-distance">km</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">Duration</span>
+            <i data-lucide="timer"></i>
+          </div>
+          <div class="metric-value-row">
+            <span class="metric-val font-mono" id="val-duration">00:00:00</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">Accuracy</span>
+            <i data-lucide="target"></i>
+          </div>
+          <div class="metric-value-row">
+            <span class="metric-val" id="val-accuracy">--</span>
+            <span class="metric-unit">m</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secondary Telemetry / Coordinates bar -->
+      <div class="coords-bar">
+        <div class="coord-item">
+          <span class="coord-label">LAT</span>
+          <span class="coord-value font-mono" id="val-lat">--.------</span>
+        </div>
+        <div class="coord-item">
+          <span class="coord-label">LNG</span>
+          <span class="coord-value font-mono" id="val-lng">--.------</span>
+        </div>
+        <div class="coord-item">
+          <span class="coord-label">ALTITUDE</span>
+          <span class="coord-value font-mono" id="val-altitude">-- m</span>
+        </div>
+        <div class="coord-item">
+          <span class="coord-label">POINTS RECORDED</span>
+          <span class="coord-value font-mono" id="val-points">0</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <div class="actions-row">
+        <button id="btn-toggle-tracking" class="btn btn-primary">
+          <i data-lucide="play" id="tracking-icon"></i>
+          <span id="tracking-btn-text">Start Live GPS</span>
+        </button>
+
+        <button id="btn-toggle-sim" class="btn btn-secondary" title="Test with a simulated GPS route on desktop">
+          <i data-lucide="play-circle" id="sim-icon"></i>
+          <span id="sim-btn-text">Simulate Route</span>
+        </button>
+
+        <button id="btn-clear" class="btn btn-icon" title="Clear Path & Reset Stats">
+          <i data-lucide="
